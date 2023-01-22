@@ -1,12 +1,6 @@
-import {
-  IconButton,
-  Text,
-  Box,
-  Spinner,
-  FormControl,
-  Input,
-  useToast,
-} from "@chakra-ui/react";
+import { IconButton, Text, Box, Spinner, useToast } from "@chakra-ui/react";
+import InputEmoji from "react-input-emoji";
+
 import React, { useState, useEffect } from "react";
 import { ChatState } from "../../../Context/ChatProvider";
 import { ArrowBackIcon } from "@chakra-ui/icons";
@@ -56,7 +50,7 @@ const SingleChat = (props) => {
     socket.on("connected", () => setSocketConnected(true));
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
-  });
+  }, []);
 
   const fetchMessages = async () => {
     if (!selectedChat) {
@@ -94,45 +88,46 @@ const SingleChat = (props) => {
     }
   };
 
-  const sendMessage = async (event) => {
+  const sendMessage = async () => {
+    socket.emit("stop typing", selectedChat._id);
+
     // on pressing Enter key, message should get send
-    if (event.key === "Enter" && newMessage) {
-      try {
-        socket.emit("stop typing", selectedChat._id);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+        },
+      };
 
-        const config = {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            "Content-Type": "application/json",
-          },
-        };
-        setNewMessage("");
+      const dataToBeSent = { chatId: selectedChat._id, content: newMessage };
 
-        const { data } = await axios.post(
-          "/api/message",
-          { chatId: selectedChat._id, content: newMessage },
-          config
-        );
-        console.log(data.createdMessage);
-        socket.emit("new message", data.createdMessage);
-        setMessages([...messages, data.createdMessage]);
-        console.log(data);
-        console.log(messages);
-      } catch (error) {
-        toast({
-          title: "Error Occured!",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom-left",
-        });
-        console.log(error);
-      }
+      setNewMessage("");
+
+      const { data } = await axios.post("/api/message", dataToBeSent, config);
+      console.log(data.createdMessage);
+      socket.emit("new message", data.createdMessage);
+      setMessages([...messages, data.createdMessage]);
+      console.log(data);
+      console.log(messages);
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+      console.log(error);
     }
   };
 
   const typingHandler = (e) => {
-    setNewMessage(e.target.value);
+    if (!e) {
+      socket.emit("stop typing", selectedChat._id);
+      return;
+    }
+    setNewMessage(e);
 
     // typing indicator logic
     if (!socketConnected) {
@@ -251,7 +246,8 @@ const SingleChat = (props) => {
                   {/* We are using npm package react-scrollable-feed  */}
                   <ScrollableChat messages={messages} />
                 </div>
-                {isTyping ? (
+
+                {isTyping && (
                   <div>
                     <Lottie
                       width={70}
@@ -259,18 +255,17 @@ const SingleChat = (props) => {
                       options={defaultOptions}
                     />
                   </div>
-                ) : (
-                  <></>
                 )}
-                <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-                  <Input
-                    placeholder="Enter a message"
-                    variant="filled"
-                    bg="#E0E0E0"
-                    value={newMessage}
-                    onChange={typingHandler}
-                  ></Input>
-                </FormControl>
+
+                {/* Read documentation about InputEmoji : https://www.npmjs.com/package/react-input-emoji  */}
+                {/* NPM Package used: react-input-emoji */}
+                <InputEmoji
+                  value={newMessage}
+                  onChange={typingHandler}
+                  cleanOnEnter
+                  onEnter={sendMessage}
+                  placeholder="Type a message"
+                />
               </>
             )}
           </Box>

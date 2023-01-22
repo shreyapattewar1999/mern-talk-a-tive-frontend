@@ -20,6 +20,7 @@ import {
   Box,
   Spinner,
   useToast,
+  Circle,
 } from "@chakra-ui/react";
 
 import React, { useState, useEffect } from "react";
@@ -40,6 +41,8 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
+  const [modifiedNotification, setModifiedNotification] = useState([]);
+
   const {
     user,
     selectedChat,
@@ -52,7 +55,6 @@ const SideDrawer = () => {
 
   let toast = useToast();
   let navigate = useNavigate();
-  let modifiedNotifications = [];
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
@@ -127,27 +129,35 @@ const SideDrawer = () => {
     }
   };
 
-  const groupBy = (arr, key) => {
-    return arr.reduce((result, currentValue) => {
-      // This is how the above code in multiple line
-      if (!result[currentValue[key]]) {
-        result[currentValue[key]] = [];
+  const groupNotifications = (notification) => {
+    if (!notification) return;
+    const result = {};
+    notification.forEach((currentValue) => {
+      const key = currentValue.chat._id;
+      if (!result[key]) {
+        result[key] = [];
       }
-      result[currentValue[key]].push(currentValue);
-    }, {});
-  };
-
-  const getCount = (arr) => {
-    const newArray = [];
-    arr.forEach((element) => {
-      newArray.push({ ...element, count: element.length });
+      result[key].push(currentValue);
     });
-    return newArray;
+    const temp = [];
+    for (var key in result) {
+      if (result.hasOwnProperty(key)) {
+        temp.push(result[key]);
+      }
+    }
+    setModifiedNotification(temp);
   };
 
+  const getNotificationsCount = () => {
+    let count = 0;
+    modifiedNotification.forEach((element) => {
+      count += element.length;
+    });
+    return count;
+  };
   useEffect(() => {
-    const groupedNotifications = groupBy(notification, "chatId");
-    modifiedNotifications = getCount(groupedNotifications);
+    if (!notification) return;
+    groupNotifications(notification);
   }, [notification]);
 
   return (
@@ -178,29 +188,43 @@ const SideDrawer = () => {
           <Menu>
             <MenuButton p={1}>
               <NotificationBadge
-                count={notification.length}
+                count={getNotificationsCount()}
                 effect={Effect.SCALE}
               />
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
             <MenuList pl={2}>
+              {/* {console.log(notification)} */}
               {!notification.length && "No new messages"}
-              {notification.map((eachNotification) => (
+
+              {modifiedNotification.map((eachNotification, index) => (
                 <MenuItem
-                  key={eachNotification._id}
+                  // key={eachNotification._id}
+                  key={index}
                   onClick={() => {
-                    setSelectedChat(eachNotification.chat);
-                    setNotification(
-                      notification.filter((n) => n !== eachNotification)
-                    );
+                    setSelectedChat(eachNotification[0].chat);
+                    modifiedNotification.splice(index, 1);
+                    setModifiedNotification(modifiedNotification);
+                    // setNotification(
+                    //   notification.filter((n) => n !== eachNotification)
+                    // );
+                    // setModifiedNotification()
                   }}
                 >
-                  {eachNotification.chat.isGroupChat
-                    ? `New Message in ${eachNotification.chat.chatName}`
-                    : `New message from ${getSender(
-                        user,
-                        eachNotification.chat.users
-                      )}`}
+                  <Circle size="25px" bg="red" color="white" mr={2}>
+                    {eachNotification.length}
+                  </Circle>
+                  {eachNotification.length === 1 ? "message " : "messages "}
+                  {eachNotification[0].chat.isGroupChat
+                    ? `in ${eachNotification[0].chat.chatName}`
+                    : `from ${getSender(user, eachNotification[0].chat.users)}`}
+                  {eachNotification[0].chat.isGroupChat && (
+                    <Tooltip label="Group Chat">
+                      <Circle size="20px" bg="green" color="white" ml={2}>
+                        G
+                      </Circle>
+                    </Tooltip>
+                  )}
                 </MenuItem>
               ))}
             </MenuList>
