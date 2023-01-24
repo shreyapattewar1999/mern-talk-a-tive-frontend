@@ -32,6 +32,8 @@ const SingleChat = (props) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [alreadyPresentNotifications, setAlreadyPresentNotifications] =
+    useState(new Set());
 
   let toast = useToast();
 
@@ -75,7 +77,7 @@ const SingleChat = (props) => {
       // we are creating new room, and we are giving room ID as selectedChat._id
       socket.emit("join chat", selectedChat._id);
 
-      console.log(messages);
+      // console.log(messages);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -105,11 +107,11 @@ const SingleChat = (props) => {
       setNewMessage("");
 
       const { data } = await axios.post("/api/message", dataToBeSent, config);
-      console.log(data.createdMessage);
+      // console.log(data.createdMessage);
       socket.emit("new message", data.createdMessage);
       setMessages([...messages, data.createdMessage]);
-      console.log(data);
-      console.log(messages);
+      // console.log(data);
+      // console.log(messages);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -124,7 +126,7 @@ const SingleChat = (props) => {
 
   const typingHandler = (e) => {
     if (!e) {
-      socket.emit("stop typing", selectedChat._id);
+      socket?.emit("stop typing", selectedChat._id);
       return;
     }
     setNewMessage(e);
@@ -135,7 +137,7 @@ const SingleChat = (props) => {
     }
     if (!typing) {
       setTyping(true);
-      socket.emit("typing", selectedChat._id);
+      socket?.emit("typing", selectedChat._id);
     }
 
     let lastTypingTime = new Date().getTime();
@@ -144,10 +146,49 @@ const SingleChat = (props) => {
       var timeNow = new Date().getTime();
       var timeDiff = timeNow - lastTypingTime;
       if (timeDiff >= timerLength && typing) {
-        socket.emit("stop typing", selectedChat._id);
+        socket?.emit("stop typing", selectedChat._id);
         setTyping(false);
       }
     }, timerLength);
+  };
+
+  const addNotificationInDb = async (notificationToBeAdded) => {
+    // console.log(notificationToBeAdded);
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      if (alreadyPresentNotifications.has(notificationToBeAdded._id)) {
+        return;
+      }
+
+      alreadyPresentNotifications.add(notificationToBeAdded._id);
+
+      const requestBody = {
+        chatId: notificationToBeAdded.chat._id,
+        content: notificationToBeAdded.content,
+        senderId: notificationToBeAdded.sender._id,
+      };
+      const { data } = await axios.post(
+        "/api/message/notification/add",
+        requestBody,
+        config
+      );
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error Occured!" + { error },
+        description: "Failed to Load the chats",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
   };
 
   // whenever selected chat changes, fetch messages again
@@ -172,7 +213,9 @@ const SingleChat = (props) => {
           selectedChatCompare._id !== newMessageReceived.chat._id)
       ) {
         if (!notification.includes(newMessageReceived)) {
+          // addNotificationInDb(newMessageReceived);
           setNotification([newMessageReceived, ...notification]);
+          console.log(notification);
           setFetchChatAgain(!fetchChatAgain);
         }
       } else {

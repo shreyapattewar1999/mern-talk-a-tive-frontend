@@ -10,7 +10,15 @@ import { getSender } from "../../Config/ChatLogics";
 
 const MyChats = (props) => {
   const [loggedUser, setLoggedUser] = useState();
-  const { user, selectedChat, chats, setChats, setSelectedChat } = ChatState();
+  const {
+    user,
+    selectedChat,
+    chats,
+    setChats,
+    setSelectedChat,
+    notification,
+    setNotification,
+  } = ChatState();
   let toast = useToast();
 
   const { fetchChatAgain, setFetchChatAgain } = props;
@@ -38,8 +46,34 @@ const MyChats = (props) => {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.get(
+        "/api/message/notification/fetch",
+        config
+      );
+      setNotification([...data?.notifications]);
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to load the notifications",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
+    fetchNotifications();
+
     fetchChats();
   }, [fetchChatAgain]);
 

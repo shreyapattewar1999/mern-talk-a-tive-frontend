@@ -62,7 +62,7 @@ const GroupChatModal = (props) => {
       const { data } = await axios.get(`/api/user?search=${query}`, config);
       setLoading(false);
       setSearchResult(data);
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       toast({
         title: "Failed to load chat !!",

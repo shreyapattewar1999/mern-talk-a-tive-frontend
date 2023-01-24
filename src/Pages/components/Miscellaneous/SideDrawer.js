@@ -129,15 +129,19 @@ const SideDrawer = () => {
     }
   };
 
-  const groupNotifications = (notification) => {
+  const groupNotifications = () => {
     if (!notification) return;
     const result = {};
-    notification.forEach((currentValue) => {
+    notification?.forEach((currentValue, index) => {
       const key = currentValue.chat._id;
-      if (!result[key]) {
-        result[key] = [];
+      if (key === selectedChat?._id) {
+        removeNotificationHandler(currentValue, index);
+      } else {
+        if (!result[key]) {
+          result[key] = [];
+        }
+        result[key].push(currentValue);
       }
-      result[key].push(currentValue);
     });
     const temp = [];
     for (var key in result) {
@@ -157,8 +161,39 @@ const SideDrawer = () => {
   };
   useEffect(() => {
     if (!notification) return;
-    groupNotifications(notification);
+    groupNotifications();
   }, [notification]);
+
+  const removeNotificationHandler = async (eachNotification, index) => {
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      setSelectedChat(eachNotification[0].chat);
+      modifiedNotification.splice(index, 1);
+      setModifiedNotification(modifiedNotification);
+      const { data } = await axios.put(
+        "/api/message/notification/remove",
+        {
+          chatId: eachNotification[0].chat._id,
+          isGroupChat: eachNotification[0].chat.isGroupChat,
+        },
+        config
+      );
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load the chats",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
 
   return (
     <>
@@ -202,13 +237,7 @@ const SideDrawer = () => {
                   // key={eachNotification._id}
                   key={index}
                   onClick={() => {
-                    setSelectedChat(eachNotification[0].chat);
-                    modifiedNotification.splice(index, 1);
-                    setModifiedNotification(modifiedNotification);
-                    // setNotification(
-                    //   notification.filter((n) => n !== eachNotification)
-                    // );
-                    // setModifiedNotification()
+                    removeNotificationHandler(eachNotification, index);
                   }}
                 >
                   <Circle size="25px" bg="red" color="white" mr={2}>
