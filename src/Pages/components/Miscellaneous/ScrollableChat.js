@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ScrollableFeed from "react-scrollable-feed";
 import {
   isSameSender,
@@ -21,6 +21,42 @@ const ScrollableChat = (props) => {
 
   //   if there are bunch of messages by a sender,
   //    profile message is displayed only once at the last message in bulk
+  const getTime = (currentTime) => {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const time = new Date(currentTime);
+    const today = new Date();
+    let date;
+    if (
+      time.getDate() === today.getDate() &&
+      time.getMonth() === today.getMonth() &&
+      time.getFullYear() === today.getFullYear()
+    ) {
+      date = "Today";
+    } else if (
+      time.getMonth() === today.getMonth() &&
+      time.getFullYear() === today.getFullYear() &&
+      today.getDate() - time.getDate() === 1
+    ) {
+      date = "Yesterday";
+    } else {
+      date = time.getDate() + " " + monthNames[time.getMonth()];
+    }
+    return date + " " + time.getHours() + ":" + time.getMinutes();
+  };
+
   return (
     <ScrollableFeed>
       {messages &&
@@ -62,6 +98,10 @@ const ScrollableChat = (props) => {
               }}
             >
               {currentMessage.content}
+              <br />
+              <span style={{ color: "#646566", fontSize: "small" }}>
+                {getTime(currentMessage?.updatedAt)}
+              </span>
             </span>
           </div>
         ))}
