@@ -41,6 +41,7 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
+  const [showAvatar, setShowAvatar] = useState(false);
   const [modifiedNotification, setModifiedNotification] = useState([]);
 
   const {
@@ -51,6 +52,7 @@ const SideDrawer = () => {
     setSelectedChat,
     notification,
     setNotification,
+    setuser,
   } = ChatState();
 
   let toast = useToast();
@@ -129,6 +131,9 @@ const SideDrawer = () => {
     }
   };
 
+  const setIncomingUser = (newUser) => {
+    setuser(newUser);
+  };
   const groupNotifications = () => {
     if (!notification) return;
     const result = {};
@@ -260,15 +265,21 @@ const SideDrawer = () => {
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-              <Avatar
-                size="sm"
-                cursor="pointer"
-                name={user.name}
-                src={user?.profile_pic}
-              ></Avatar>
+              {!showAvatar && (
+                <Avatar
+                  size="sm"
+                  cursor="pointer"
+                  name={user.name}
+                  src={user?.profile_pic}
+                ></Avatar>
+              )}
             </MenuButton>
             <MenuList>
-              <ProfileModal user={user}>
+              <ProfileModal
+                user={user}
+                setIncomingUser={setIncomingUser}
+                setShowAvatar={setShowAvatar}
+              >
                 <MenuItem>My Profile</MenuItem>
               </ProfileModal>
               <MenuDivider />

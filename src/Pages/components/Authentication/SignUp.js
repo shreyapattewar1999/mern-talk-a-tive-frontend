@@ -21,6 +21,8 @@ const SignUp = () => {
   const [picture, setPicture] = useState(null);
   const [show, setshow] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [picturePublicId, setPicturePublicId] = useState();
+
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -50,6 +52,8 @@ const SignUp = () => {
         .then((res) => res.json())
         .then((data) => {
           setPicture(data.url.toString());
+          setPicturePublicId(data.public_id);
+
           setLoading(false);
         })
         .catch((err) => {
@@ -94,6 +98,7 @@ const SignUp = () => {
             email,
             password,
             profile_pic: picture,
+            profile_pic_public_id: picturePublicId,
           },
           config
         );
@@ -106,7 +111,7 @@ const SignUp = () => {
         });
         localStorage.setItem("userInfo", JSON.stringify(data));
         setLoading(false);
-        navigate("/chats");
+        // navigate("/chats");
       } catch (error) {
         toast({
           title: "Error occured !!",
@@ -115,6 +120,8 @@ const SignUp = () => {
           isClosable: true,
           position: "bottom",
         });
+        setLoading(false);
+
         return;
       }
     }
