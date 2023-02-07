@@ -186,11 +186,11 @@ const ProfileModal = (props) => {
       {props.children ? (
         <span onClick={onOpen}>{props.children}</span>
       ) : (
-        <Icon
+        <IconButton
           display={{ base: "flex" }}
           icon={<ViewIcon />}
           onClick={onOpen}
-        ></Icon>
+        ></IconButton>
       )}
 
       <Modal size="lg" isCentered isOpen={isOpen} onClose={onClose}>
@@ -250,23 +250,25 @@ const ProfileModal = (props) => {
                     </Avatar>
                   </>
                 )}
-                <Tooltip label="Edit Profile Picture">
-                  <IconButton
-                    style={{
-                      borderRadius: "40px",
-                      border: "0.5px solid black",
-                      color: "black",
-                      fontSize: "20px",
-                      position: "absolute",
-                      bottom: "0",
-                      right: "0",
-                      backgroundColor: showModifyPic ? "#66e0ff" : "",
-                    }}
-                    aria-label="Edit Profile Picture"
-                    icon={<FaPencilAlt />}
-                    onClick={() => setShowModifyPic(!showModifyPic)}
-                  ></IconButton>
-                </Tooltip>
+                {user._id === incomingUser._id && (
+                  <Tooltip label="Edit Profile Picture">
+                    <IconButton
+                      style={{
+                        borderRadius: "40px",
+                        border: "0.5px solid black",
+                        color: "black",
+                        fontSize: "20px",
+                        position: "absolute",
+                        bottom: "0",
+                        right: "0",
+                        backgroundColor: showModifyPic ? "#66e0ff" : "",
+                      }}
+                      aria-label="Edit Profile Picture"
+                      icon={<FaPencilAlt />}
+                      onClick={() => setShowModifyPic(!showModifyPic)}
+                    ></IconButton>
+                  </Tooltip>
+                )}
               </div>
               <br />
 

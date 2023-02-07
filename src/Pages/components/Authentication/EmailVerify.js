@@ -20,7 +20,9 @@ const EmailVerify = () => {
 
   const verifyEmail = async () => {
     try {
-      const { data } = await axios.get(`/api/user/${params.id}/verify`);
+      const { data } = await axios.get(
+        `/api/user/${params.id}/verify/${params.timestamp}`
+      );
       if (data.validUrl) {
         toast({
           title: data.message,
@@ -37,7 +39,7 @@ const EmailVerify = () => {
         toast({
           title: error.response.data.message,
           status: "error",
-          duration: 5000,
+          duration: 20000,
           isClosable: true,
           position: "bottom",
         });

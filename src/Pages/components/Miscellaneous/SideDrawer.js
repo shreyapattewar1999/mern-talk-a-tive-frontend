@@ -138,7 +138,7 @@ const SideDrawer = () => {
     if (!notification) return;
     const result = {};
     notification?.forEach((currentValue, index) => {
-      const key = currentValue.chat._id;
+      const key = currentValue?.chat?._id;
       if (key === selectedChat?._id) {
         removeNotificationHandler(currentValue, index);
       } else {
@@ -177,17 +177,19 @@ const SideDrawer = () => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      setSelectedChat(eachNotification[0].chat);
+      setSelectedChat(eachNotification[0]?.chat);
       modifiedNotification.splice(index, 1);
       setModifiedNotification(modifiedNotification);
-      const { data } = await axios.put(
-        "/api/message/notification/remove",
-        {
-          chatId: eachNotification[0].chat._id,
-          isGroupChat: eachNotification[0].chat.isGroupChat,
-        },
-        config
-      );
+      if (eachNotification[0]?.chat?._id) {
+        const { data } = await axios.put(
+          "/api/message/notification/remove",
+          {
+            chatId: eachNotification[0]?.chat?._id,
+            isGroupChat: eachNotification[0]?.chat.isGroupChat,
+          },
+          config
+        );
+      }
     } catch (error) {
       toast({
         title: "Error Occured!",

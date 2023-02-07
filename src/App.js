@@ -8,7 +8,11 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route exact path="/user/:id/verify" element={<EmailVerify />} />
+        <Route
+          exact
+          path="/user/:id/verify/:timestamp"
+          element={<EmailVerify />}
+        />
 
         <Route exact path="/" element={<HomePage />} />
         <Route exact path="/chats" element={<ChatPage />} />

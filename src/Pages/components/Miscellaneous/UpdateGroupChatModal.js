@@ -35,7 +35,7 @@ const UpdateGroupChatModal = (props) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [renameLoading, setRenameLoading] = useState(false);
 
   const handleRemoveUser = async (userToBeRemoved) => {

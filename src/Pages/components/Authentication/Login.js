@@ -18,6 +18,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [show, setshow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifyEmailFlag, setVerifyEmailFlag] = useState(false);
+  const [userId, setUserId] = useState(null);
   const toast = useToast();
 
   let navigate = useNavigate();
@@ -26,6 +28,7 @@ const Login = () => {
     setEmail("guest@example.com");
     setPassword("guest");
   };
+
   const submitHandler = async () => {
     setLoading(true);
     if (!email || !password) {
@@ -65,6 +68,21 @@ const Login = () => {
         setLoading(false);
         navigate("/chats");
       } catch (error) {
+        if (!error?.response?.data?.is_email_verified) {
+          toast({
+            title:
+              "Please verify your email address first !! We have sent verification link on your email id. Please check your inbox",
+            status: "warning",
+            duration: 20000,
+            isClosable: true,
+            position: "bottom",
+          });
+          setUserId(error?.response?.data?.userId);
+          setVerifyEmailFlag(true);
+          setLoading(false);
+
+          return;
+        }
         toast({
           title: "Error occured !!",
           status: "error",
@@ -76,6 +94,11 @@ const Login = () => {
       }
     }
   };
+
+  const verifyEmailAddress = () => {
+    navigate("user/" + userId + "/verify");
+  };
+
   return (
     <VStack spacing="5px">
       <FormControl id="login_email" isRequired>
