@@ -8,6 +8,7 @@ import {
   InputGroup,
   InputRightElement,
   useToast,
+  Text,
 } from "@chakra-ui/react";
 
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,10 @@ const Login = () => {
     setPassword("guest");
   };
 
+  const updatePasswordHandler = () => {
+    if (!email) return;
+    navigate("/user/" + email + "/forgotpassword");
+  };
   const submitHandler = async () => {
     setLoading(true);
     if (!email || !password) {
@@ -70,8 +75,7 @@ const Login = () => {
       } catch (error) {
         if (!error?.response?.data?.is_email_verified) {
           toast({
-            title:
-              "Please verify your email address first !! We have sent verification link on your email id. Please check your inbox",
+            title: error?.response?.data?.message,
             status: "warning",
             duration: 20000,
             isClosable: true,
@@ -147,6 +151,13 @@ const Login = () => {
         onClick={getGuestUserCredentials}
       >
         Get Guest User Credentials
+      </Button>
+      <Button
+        decoration="underline"
+        color="blue"
+        onClick={updatePasswordHandler}
+      >
+        Forgot Password
       </Button>
     </VStack>
   );
