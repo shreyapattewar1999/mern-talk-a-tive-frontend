@@ -72,9 +72,9 @@ const ForgotPassword = () => {
   useEffect(() => {
     setEmail(params?.email);
     if (params?.email) {
-      // genersmeOtp();
+      generateOtp();
     }
-  }, [params]);
+  }, []);
 
   const updatePasswordHandler = async () => {
     try {

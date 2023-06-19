@@ -5,6 +5,7 @@ import {
   Menu,
   MenuButton,
   MenuList,
+  MenuGroup,
   Avatar,
   MenuItem,
   MenuDivider,
@@ -23,7 +24,7 @@ import {
   Circle,
 } from "@chakra-ui/react";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import { ChatState } from "../../../Context/ChatProvider";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
@@ -43,6 +44,7 @@ const SideDrawer = () => {
 
   const [showAvatar, setShowAvatar] = useState(false);
   const [modifiedNotification, setModifiedNotification] = useState([]);
+  const firstField = useRef();
 
   const {
     user,
@@ -93,20 +95,22 @@ const SideDrawer = () => {
         isClosable: true,
         position: "bottom-left",
       });
-      console.log(error);
+      // console.log(error);
       return;
     }
   };
 
-  const handleSearch = async () => {
+  const getSearchSuggestions = async () => {
     if (!search) {
-      toast({
-        title: "Please enter something in search",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
+      setSearchResult([]);
+      //   toast({
+      //     title: "Please type something in search",
+      //     status: "warning",
+      //     duration: 5000,
+      //     isClosable: true,
+      //     position: "bottom",
+      //   });
+      return;
     }
     try {
       setLoading(true);
@@ -169,6 +173,14 @@ const SideDrawer = () => {
     groupNotifications();
   }, [notification]);
 
+  // Debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => getSearchSuggestions(), 200);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [search]);
+
   const removeNotificationHandler = async (eachNotification, index) => {
     try {
       const config = {
@@ -216,7 +228,12 @@ const SideDrawer = () => {
         }}
       >
         <Tooltip label="Search users to chat" hasArrow placement="bottom-end">
-          <Button variant="ghost" placeholder="Enter name" onClick={onOpen}>
+          <Button
+            variant="outline"
+            borderColor="#00A3C4"
+            placeholder="Enter name"
+            onClick={onOpen}
+          >
             <FaSearch />
             <Text display={{ base: "none", md: "flex" }} px="4">
               Search User
@@ -235,34 +252,41 @@ const SideDrawer = () => {
               />
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
-            <MenuList pl={2}>
+            <MenuList p={2} boxShadow="lg">
               {/* {console.log(notification)} */}
-              {!notification.length && "No new messages"}
-
-              {modifiedNotification.map((eachNotification, index) => (
-                <MenuItem
-                  // key={eachNotification._id}
-                  key={index}
-                  onClick={() => {
-                    removeNotificationHandler(eachNotification, index);
-                  }}
-                >
-                  <Circle size="25px" bg="red" color="white" mr={2}>
-                    {eachNotification.length}
-                  </Circle>
-                  {eachNotification.length === 1 ? "message " : "messages "}
-                  {eachNotification[0].chat.isGroupChat
-                    ? `in ${eachNotification[0].chat.chatName}`
-                    : `from ${getSender(user, eachNotification[0].chat.users)}`}
-                  {eachNotification[0].chat.isGroupChat && (
-                    <Tooltip label="Group Chat">
-                      <Circle size="20px" bg="green" color="white" ml={2}>
-                        G
+              {!notification.length ? (
+                "No new messages"
+              ) : (
+                <MenuGroup title="Notifications">
+                  {modifiedNotification.map((eachNotification, index) => (
+                    <MenuItem
+                      // key={eachNotification._id}
+                      key={index}
+                      onClick={() => {
+                        removeNotificationHandler(eachNotification, index);
+                      }}
+                    >
+                      <Circle size="25px" bg="red" color="white" mr={2}>
+                        {eachNotification.length}
                       </Circle>
-                    </Tooltip>
-                  )}
-                </MenuItem>
-              ))}
+                      {eachNotification.length === 1 ? "Message " : "Messages "}
+                      {eachNotification[0].chat.isGroupChat
+                        ? `in ${eachNotification[0].chat.chatName}`
+                        : `from ${getSender(
+                            user,
+                            eachNotification[0].chat.users
+                          )}`}
+                      {eachNotification[0].chat.isGroupChat && (
+                        <Tooltip label="Group Chat">
+                          <Circle size="20px" bg="green" color="white" ml={2}>
+                            G
+                          </Circle>
+                        </Tooltip>
+                      )}
+                    </MenuItem>
+                  ))}
+                </MenuGroup>
+              )}
             </MenuList>
           </Menu>
           <Menu>
@@ -290,7 +314,12 @@ const SideDrawer = () => {
           </Menu>
         </div>
       </div>
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+      <Drawer
+        isOpen={isOpen}
+        placement="left"
+        onClose={onClose}
+        initialFocusRef={firstField}
+      >
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
@@ -303,8 +332,8 @@ const SideDrawer = () => {
                 mr={2}
                 value={search}
                 onChange={(e) => setsearch(e.target.value)}
+                ref={firstField}
               />
-              <Button onClick={handleSearch}>Go</Button>
             </Box>
             {loading ? (
               <ChatLoading />
@@ -321,10 +350,15 @@ const SideDrawer = () => {
           </DrawerBody>
 
           <DrawerFooter>
-            <Button variant="outline" mr={3} onClick={onClose}>
+            <Button
+              variant="outline"
+              colorScheme="red"
+              mr={3}
+              onClick={onClose}
+            >
               Cancel
             </Button>
-            <Button colorScheme="blue">Save</Button>
+            {/* <Button colorScheme="blue">Save</Button> */}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

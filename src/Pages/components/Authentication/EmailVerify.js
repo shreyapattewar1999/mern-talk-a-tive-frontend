@@ -34,7 +34,7 @@ const EmailVerify = () => {
         setValidUrl(data.validUrl);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error?.response?.data?.validUrl) {
         toast({
           title: error.response.data.message,

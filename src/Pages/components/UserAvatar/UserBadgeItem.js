@@ -4,6 +4,7 @@ import React from "react";
 
 const UserBadgeItem = (props) => {
   const { user, handleDelete } = props;
+  // console.log(user._id, props?.isVisible);
   return (
     <Box
       px={2}
@@ -13,13 +14,16 @@ const UserBadgeItem = (props) => {
       mb={2}
       variant="solid"
       fontSize={12}
-      backgroundColor="purple"
+      backgroundColor={props.backgroundColor ? props.backgroundColor : "purple"}
       color="white"
       w="fit-content"
       cursor="pointer"
     >
       {user.name}
-      <CloseIcon pl={1} onClick={() => handleDelete(user)} />
+      {/* {console.log(isVisible)} */}
+      {props?.isVisible && (
+        <CloseIcon pl={1} onClick={() => handleDelete(user)} />
+      )}
     </Box>
   );
 };

@@ -65,7 +65,7 @@ const ProfileModal = (props) => {
           setLoading(false);
         })
         .catch((err) => {
-          console.log(err);
+          // console.log(err);
           setLoading(false);
         });
     }
@@ -186,16 +186,22 @@ const ProfileModal = (props) => {
       {props.children ? (
         <span onClick={onOpen}>{props.children}</span>
       ) : (
-        <IconButton
-          display={{ base: "flex" }}
-          icon={<ViewIcon />}
-          onClick={onOpen}
-        ></IconButton>
+        <Tooltip label="View Profile" placement="bottom-start">
+          <IconButton
+            display={{ base: "flex" }}
+            icon={<ViewIcon />}
+            onClick={onOpen}
+            variant="outline"
+            colorScheme="black"
+          ></IconButton>
+        </Tooltip>
       )}
 
       <Modal size="lg" isCentered isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent h="60%">
+
+        {/* h="60%" for ModalContent */}
+        <ModalContent>
           <ModalHeader>
             <div
               style={{
@@ -272,7 +278,7 @@ const ProfileModal = (props) => {
               </div>
               <br />
 
-              <Text fontSize="20px">{incomingUser.email}</Text>
+              <Text fontSize="20px">{incomingUser?.email}</Text>
               <br />
 
               {user._id === incomingUser._id && showModifyPic && (
@@ -281,6 +287,7 @@ const ProfileModal = (props) => {
                     display: "flex",
                     justifyContent: "space-between",
                   }}
+                  // hidden={user._id !== incomingUser._id || showModifyPic}
                 >
                   <FormControl
                     id="profilePic"

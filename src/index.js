@@ -1,21 +1,56 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import { ChakraProvider } from "@chakra-ui/react";
-import { BrowserRouter as Router } from "react-router-dom";
-import ChatProvider from "./Context/ChatProvider";
 // ChakraProvider is component based library which makes app and development really faster
 
+import "./index.css";
+import App from "./App";
+import HomePage from "./Pages/HomePage";
+import ChatPage from "./Pages/ChatPage";
+import EmailVerify from "./Pages/components/Authentication/EmailVerify";
+import ForgotPassword from "./Pages/components/Authentication/ForgotPassword";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
+const routingConfiguration = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/user/:email/forgotpassword",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/user/:id/verify/:timestamp",
+        element: <EmailVerify />,
+      },
+      {
+        path: "/chats",
+        element: <ChatPage />,
+      },
+    ],
+  },
+]);
 root.render(
-  <Router>
-    <ChatProvider>
-      <ChakraProvider>
-        <App />
-      </ChakraProvider>
-    </ChatProvider>
-  </Router>
+  <>
+    <ChakraProvider>
+      <RouterProvider router={routingConfiguration}></RouterProvider>
+    </ChakraProvider>
+  </>
+  // <div className="app">
+  //   <RouterProvider router={routingConfiguration}>
+  //     <ChatProvider>
+  //       <ChakraProvider>{/* <App /> */}</ChakraProvider>
+  //     </ChatProvider>
+  //   </RouterProvider>
+  // </div>
 );
 
 // If you want to start measuring performance in your app, pass a function

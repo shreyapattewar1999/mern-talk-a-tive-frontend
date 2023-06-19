@@ -1,7 +1,7 @@
 import { IconButton, Text, Box, Spinner, useToast } from "@chakra-ui/react";
 import InputEmoji from "react-input-emoji";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChatState } from "../../../Context/ChatProvider";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { getSender, getSenderEntireInfo } from "../../Config/ChatLogics";
@@ -34,7 +34,6 @@ const SingleChat = (props) => {
   const [isTyping, setIsTyping] = useState(false);
   const [alreadyPresentNotifications, setAlreadyPresentNotifications] =
     useState(new Set());
-
   let toast = useToast();
 
   const defaultOptions = {
@@ -45,6 +44,7 @@ const SingleChat = (props) => {
       preserveAspectRatio: "xMidYMid slice",
     },
   };
+
   useEffect(() => {
     socket = io(ENDPOINT);
     // here we are emiting logged user data to socket named "setup"
@@ -120,7 +120,6 @@ const SingleChat = (props) => {
         isClosable: true,
         position: "bottom-left",
       });
-      console.log(error);
     }
   };
 
@@ -179,7 +178,7 @@ const SingleChat = (props) => {
         config
       );
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast({
         title: "Error Occured!" + { error },
         description: "Failed to Load the chats",
@@ -205,7 +204,6 @@ const SingleChat = (props) => {
       //  and message received from chat are different
       // like currently opened chat is with Shreya and message is received from different group
       // then in this situation we need to give notification
-      // console.log(newMessageReceived);
 
       if (
         !selectedChatCompare ||
@@ -215,15 +213,13 @@ const SingleChat = (props) => {
         if (!notification.includes(newMessageReceived)) {
           // addNotificationInDb(newMessageReceived);
           setNotification([newMessageReceived, ...notification]);
-          console.log(notification);
+          // console.log(notification);
           setFetchChatAgain(!fetchChatAgain);
         }
       } else {
-        // console.log("setting up messages array");
         setMessages([...messages, newMessageReceived]);
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   });
 
   return (

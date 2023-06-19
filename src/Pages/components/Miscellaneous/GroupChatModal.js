@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   useDisclosure,
   Button,
@@ -26,15 +26,19 @@ const GroupChatModal = (props) => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(true);
+  const initialRef = useRef(null);
 
   const toast = useToast();
 
   const { user, chats, setChats } = ChatState();
 
   const handleGroup = (usersToBeAdded) => {
-    if (selectedUsers.includes(usersToBeAdded)) {
+    const isUserAlreadyPresent = selectedUsers.find(
+      (c) => c._id === usersToBeAdded._id
+    );
+    if (isUserAlreadyPresent) {
       toast({
-        title: "User already added!",
+        title: "This user is already added!, Please select another user",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -46,11 +50,11 @@ const GroupChatModal = (props) => {
     setSelectedUsers([...selectedUsers, usersToBeAdded]);
   };
 
-  const handleSearch = async (query) => {
-    if (!query) {
+  const getSearchSuggestions = async () => {
+    if (!search) {
+      setSearchResult([]);
       return;
     }
-    setSearch(query);
 
     try {
       setLoading(true);
@@ -59,7 +63,7 @@ const GroupChatModal = (props) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      const { data } = await axios.get(`/api/user?search=${search}`, config);
       setLoading(false);
       setSearchResult(data);
       // console.log(data);
@@ -71,7 +75,7 @@ const GroupChatModal = (props) => {
         isClosable: true,
         position: "bottom-left",
       });
-      console.log(error);
+      // console.log(error);
       setLoading(false);
 
       return;
@@ -122,11 +126,27 @@ const GroupChatModal = (props) => {
     );
   };
 
+  // Debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => getSearchSuggestions(), 200);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [search]);
+
   return (
     <>
+      {/* here props.children is button to Start Group Chat which is when clicked onOpen function of modal popup gets called and modal popup gets opened */}
       <span onClick={onOpen}>{props.children}</span>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      {/* initialFocusRef={initialRef} => this is used to focus first input box for chat name as soon as modal is opened */}
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        isCentered
+        initialFocusRef={initialRef}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader fontSize="25px" fontFamily="Work Sans">
@@ -145,6 +165,7 @@ const GroupChatModal = (props) => {
             >
               <FormControl>
                 <Input
+                  ref={initialRef}
                   placeholder="Chat Name"
                   mb={3}
                   onChange={(e) => setGroupChatName(e.target.value)}
@@ -152,7 +173,7 @@ const GroupChatModal = (props) => {
                 <Input
                   placeholder="Enter name of members "
                   mb={1}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </FormControl>
               <div style={{ display: "flex" }}>
@@ -161,19 +182,20 @@ const GroupChatModal = (props) => {
                     key={u._id}
                     user={u}
                     handleDelete={handleDelete}
+                    isVisible={true}
                   />
                 ))}
               </div>
-              {loading ? (
+              {loading && searchResult.length !== 0 ? (
                 <Spinner size="lg" />
               ) : (
                 searchResult
                   ?.slice(0, 4)
-                  .map((user) => (
+                  .map((currentUser) => (
                     <UserListItem
-                      key={user._id}
-                      currentUser={user}
-                      handleFunction={() => handleGroup(user)}
+                      key={currentUser._id}
+                      currentUser={currentUser}
+                      handleFunction={() => handleGroup(currentUser)}
                     ></UserListItem>
                   ))
               )}

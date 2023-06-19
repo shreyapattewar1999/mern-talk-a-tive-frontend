@@ -1,17 +1,17 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import "./App.css";
-import HomePage from "./Pages/HomePage";
-import ChatPage from "./Pages/ChatPage";
-import EmailVerify from "./Pages/components/Authentication/EmailVerify";
-import ForgotPassword from "./Pages/components/Authentication/ForgotPassword";
+
+import ChatProvider from "./Context/ChatProvider";
 
 function App() {
   return (
     <div className="App">
-      <Routes>
-        <Route exact path="/" element={<HomePage />} />
-
+      <ChatProvider>
+        <Outlet />
+      </ChatProvider>
+      {/* <RouterProvider router={routingConfiguration} /> */}
+      {/* <Routes>
         <Route
           exact
           path="/user/:email/forgotpassword"
@@ -24,7 +24,8 @@ function App() {
         />
 
         <Route exact path="/chats" element={<ChatPage />} />
-      </Routes>
+        <Route exact path="/" element={<HomePage />} />
+      </Routes> */}
     </div>
   );
 }

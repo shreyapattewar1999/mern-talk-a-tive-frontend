@@ -8,7 +8,8 @@ import {
   InputGroup,
   InputRightElement,
   useToast,
-  Text,
+  Tooltip,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [verifyEmailFlag, setVerifyEmailFlag] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [isEmailValid, setIsEmailValid] = useState(true);
   const toast = useToast();
 
   let navigate = useNavigate();
@@ -34,11 +36,26 @@ const Login = () => {
     if (!email) return;
     navigate("/user/" + email + "/forgotpassword");
   };
+
+  const isValidEmailAddress = (address) => {
+    const flag = !!address.match(/.+@.+/);
+    setIsEmailValid(flag);
+  };
+
   const submitHandler = async () => {
     setLoading(true);
+    let message = "";
     if (!email || !password) {
+      if (!email && !password) {
+        message = "Please enter email and password to proceed";
+      } else if (!email) {
+        message = "Please type email id to login";
+      } else {
+        message = "Please type your login password";
+      }
+
       toast({
-        title: "Please fill all the fields",
+        title: message,
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -75,7 +92,9 @@ const Login = () => {
       } catch (error) {
         if (!error?.response?.data?.is_email_verified) {
           toast({
-            title: error?.response?.data?.message,
+            title: error?.response?.data?.message
+              ? error?.response?.data?.message
+              : "Unexpected error occurred, please check again your credentials",
             status: "warning",
             duration: 20000,
             isClosable: true,
@@ -105,13 +124,24 @@ const Login = () => {
 
   return (
     <VStack spacing="5px">
-      <FormControl id="login_email" isRequired>
+      <FormControl
+        id="login_email"
+        isRequired
+        type="email"
+        isInvalid={!isEmailValid}
+      >
         <FormLabel>Email</FormLabel>
         <Input
           placeholder="Enter your email"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            isValidEmailAddress(e.target.value);
+          }}
           value={email}
         ></Input>
+        {!isEmailValid && (
+          <FormErrorMessage>Please enter valid email address.</FormErrorMessage>
+        )}
       </FormControl>
       <FormControl id="login_password" isRequired>
         <FormLabel>Password</FormLabel>
@@ -152,13 +182,20 @@ const Login = () => {
       >
         Get Guest User Credentials
       </Button>
-      <Button
-        decoration="underline"
-        color="blue"
-        onClick={updatePasswordHandler}
+      <Tooltip
+        label={
+          email.length === 0 ? "Please enter valid email address first" : ""
+        }
       >
-        Forgot Password
-      </Button>
+        <Button
+          decoration="underline"
+          color="blue"
+          onClick={updatePasswordHandler}
+          disabled={email.length === 0}
+        >
+          Forgot Password
+        </Button>
+      </Tooltip>
     </VStack>
   );
 };

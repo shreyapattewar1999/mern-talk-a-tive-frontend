@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { ChatState } from "../Context/ChatProvider";
 import MyChats from "./components/Miscellaneous/MyChats";
 import ChatBox from "./components/Miscellaneous/ChatBox";
 import SideDrawer from "./components/Miscellaneous/SideDrawer";
+import { ChatState } from "../Context/ChatProvider";
 
 const ChatPage = () => {
-  const [chats, setChats] = useState();
   const { user } = ChatState();
   const [fetchChatAgain, setFetchChatAgain] = useState(false);
 
