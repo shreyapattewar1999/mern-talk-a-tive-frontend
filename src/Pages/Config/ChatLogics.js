@@ -76,3 +76,11 @@ export const isSameUser = (allMessages, currentMessage, currentIndex) => {
     allMessages[currentIndex - 1].sender._id === currentMessage.sender._id
   );
 };
+
+export const checkCurrentUserOnline = (allOnlineUsers, currentUserId) => {
+  const isExist = allOnlineUsers.find((uid) => uid === currentUserId);
+  if (isExist) {
+    return true;
+  }
+  return false;
+};

@@ -293,6 +293,7 @@ const UpdateGroupChatModal = (props) => {
       <Tooltip label="View/Update Group Info" placement="bottom-start">
         <IconButton
           display={{ base: "flex" }}
+          style={{ marginLeft: "1%" }}
           icon={<ViewIcon />}
           variant="outline"
           colorScheme="black"

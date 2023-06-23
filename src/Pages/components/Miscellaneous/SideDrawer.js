@@ -1,3 +1,15 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import io from "socket.io-client";
+
+import { ChatState } from "../../../Context/ChatProvider";
+import { getSender } from "../../Config/ChatLogics";
+
+import ChatLoading from "../Miscellaneous/ChatLoading";
+import ProfileModal from "./ProfileModal";
+import UserListItem from "../UserAvatar/UserListItem";
+
 import {
   Tooltip,
   Button,
@@ -23,19 +35,11 @@ import {
   useToast,
   Circle,
 } from "@chakra-ui/react";
-
-import React, { useState, useEffect, useRef } from "react";
-import { FaSearch } from "react-icons/fa";
-import { ChatState } from "../../../Context/ChatProvider";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import ProfileModal from "./ProfileModal";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import ChatLoading from "../Miscellaneous/ChatLoading";
-import UserListItem from "../UserAvatar/UserListItem";
-import { getSender } from "../../Config/ChatLogics";
+import { FaSearch } from "react-icons/fa";
 import NotificationBadge, { Effect } from "react-notification-badge";
-
+import { ENDPOINT } from "../../../Utility/constants";
+var socket;
 const SideDrawer = () => {
   const [search, setsearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -60,7 +64,12 @@ const SideDrawer = () => {
   let toast = useToast();
   let navigate = useNavigate();
 
-  const logoutHandler = () => {
+  useEffect(() => {
+    socket = io(ENDPOINT);
+  }, []);
+  const logoutHandler = async () => {
+    socket.emit("logout-current-user", user._id);
+
     localStorage.removeItem("userInfo");
     navigate("/");
   };
@@ -138,6 +147,7 @@ const SideDrawer = () => {
   const setIncomingUser = (newUser) => {
     setuser(newUser);
   };
+
   const groupNotifications = () => {
     if (!notification) return;
     const result = {};
@@ -170,6 +180,7 @@ const SideDrawer = () => {
   };
   useEffect(() => {
     if (!notification) return;
+    // console.log(notification);
     groupNotifications();
   }, [notification]);
 

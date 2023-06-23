@@ -1,20 +1,35 @@
-import { IconButton, Text, Box, Spinner, useToast } from "@chakra-ui/react";
-import InputEmoji from "react-input-emoji";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import io from "socket.io-client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { ChatState } from "../../../Context/ChatProvider";
-import { ArrowBackIcon } from "@chakra-ui/icons";
-import { getSender, getSenderEntireInfo } from "../../Config/ChatLogics";
 import ProfileModal from "../Miscellaneous/ProfileModal";
 import UpdateGroupChatModal from "./UpdateGroupChatModal";
 import ScrollableChat from "./ScrollableChat";
-import axios from "axios";
+
+import { ChatState } from "../../../Context/ChatProvider";
+import { getSender, getSenderEntireInfo } from "../../Config/ChatLogics";
+
 import "../styles.css";
-import io from "socket.io-client";
+
+import {
+  IconButton,
+  Text,
+  Box,
+  Spinner,
+  useToast,
+  MenuButton,
+  Button,
+  MenuItem,
+  MenuList,
+  Menu,
+} from "@chakra-ui/react";
+import { ArrowBackIcon, DeleteIcon } from "@chakra-ui/icons";
+import { AiOutlineMore } from "react-icons/ai";
+import InputEmoji from "react-input-emoji";
 import Lottie from "react-lottie";
 import animationData from "../../../animations/typing.json";
 
-const ENDPOINT = "http://localhost:5000";
+import { ENDPOINT } from "../../../Utility/constants";
 // ENDPOINT: server endpoint
 
 var socket, selectedChatCompare;
@@ -34,6 +49,7 @@ const SingleChat = (props) => {
   const [isTyping, setIsTyping] = useState(false);
   const [alreadyPresentNotifications, setAlreadyPresentNotifications] =
     useState(new Set());
+
   let toast = useToast();
 
   const defaultOptions = {
@@ -49,7 +65,10 @@ const SingleChat = (props) => {
     socket = io(ENDPOINT);
     // here we are emiting logged user data to socket named "setup"
     socket.emit("setup", user);
-    socket.on("connected", () => setSocketConnected(true));
+    socket.on("connected", () => {
+      setSocketConnected(true);
+    });
+
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
   }, []);
@@ -90,6 +109,50 @@ const SingleChat = (props) => {
     }
   };
 
+  const handleClearMessages = async () => {
+    if (!selectedChat) {
+      return;
+    }
+    try {
+      let text;
+      if (!selectedChat.isGroupChat) {
+        text = `Are you sure you want to delete chat with ${getSender(
+          user,
+          selectedChat.users
+        )} ?`;
+      } else {
+        text = `Are you sure you want to delete messages of ${selectedChat?.chatName} ?`;
+      }
+
+      if (window.confirm(text) === true) {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+        await axios.delete(
+          `api/message/clearMessages/${selectedChat._id}`,
+          config
+        );
+        setMessages([]);
+        toast({
+          title: "Messages are deleted!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error Occured!",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
   const sendMessage = async () => {
     socket.emit("stop typing", selectedChat._id);
 
@@ -152,41 +215,45 @@ const SingleChat = (props) => {
   };
 
   const addNotificationInDb = async (notificationToBeAdded) => {
-    // console.log(notificationToBeAdded);
-    try {
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
+    console.log(notificationToBeAdded?.sender?._id);
+    if (notificationToBeAdded) {
+      try {
+        const config = {
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
 
-      if (alreadyPresentNotifications.has(notificationToBeAdded._id)) {
-        return;
+        if (alreadyPresentNotifications.has(notificationToBeAdded._id)) {
+          return;
+        }
+
+        alreadyPresentNotifications.add(notificationToBeAdded._id);
+
+        const requestBody = {
+          chatId: notificationToBeAdded.chat._id,
+          content: notificationToBeAdded.content,
+          senderId: notificationToBeAdded.sender._id,
+          users: notificationToBeAdded.chat.users,
+          isGroupChat: notificationToBeAdded.chat.isGroupChat,
+        };
+        const { data } = await axios.post(
+          "/api/message/notification/add",
+          requestBody,
+          config
+        );
+      } catch (error) {
+        // console.log(error);
+        toast({
+          title: "Error Occured!" + { error },
+          description: "Failed to Load the chats",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom-left",
+        });
       }
-
-      alreadyPresentNotifications.add(notificationToBeAdded._id);
-
-      const requestBody = {
-        chatId: notificationToBeAdded.chat._id,
-        content: notificationToBeAdded.content,
-        senderId: notificationToBeAdded.sender._id,
-      };
-      const { data } = await axios.post(
-        "/api/message/notification/add",
-        requestBody,
-        config
-      );
-    } catch (error) {
-      // console.log(error);
-      toast({
-        title: "Error Occured!" + { error },
-        description: "Failed to Load the chats",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-left",
-      });
     }
   };
 
@@ -199,7 +266,8 @@ const SingleChat = (props) => {
 
   useEffect(() => {
     // here we are emiting logged user data to socket named "setup"
-    socket.on("message received", (newMessageReceived) => {
+    socket.on("message received", async (newMessageReceived) => {
+      // console.log(newMessageReceived);
       // selectedChat._id !== selectedChatCompare._id ==> this refers to if opened chat
       //  and message received from chat are different
       // like currently opened chat is with Shreya and message is received from different group
@@ -211,8 +279,8 @@ const SingleChat = (props) => {
           selectedChatCompare._id !== newMessageReceived.chat._id)
       ) {
         if (!notification.includes(newMessageReceived)) {
-          // addNotificationInDb(newMessageReceived);
-          setNotification([newMessageReceived, ...notification]);
+          // await addNotificationInDb(newMessageReceived);
+          // setNotification([newMessageReceived, ...notification]);
           // console.log(notification);
           setFetchChatAgain(!fetchChatAgain);
         }
@@ -258,6 +326,19 @@ const SingleChat = (props) => {
                 ></UpdateGroupChatModal>
               </>
             )}
+            {!selectedChat.isGroupChat && (
+              <Menu>
+                <MenuButton as={Button} style={{ marginLeft: "auto" }}>
+                  <AiOutlineMore style={{ fontSize: "28px" }} />
+                </MenuButton>
+                <MenuList style={{ fontSize: "16px" }}>
+                  <MenuItem icon={<DeleteIcon />} onClick={handleClearMessages}>
+                    Delete messages for
+                    {selectedChat.isGroupChat ? " everyone" : " both"}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            )}
           </Box>
           <Box
             display="flex"
@@ -283,7 +364,10 @@ const SingleChat = (props) => {
                 {/* We can also give styles using styles.css as mentioned in below line */}
                 <div className="messages">
                   {/* We are using npm package react-scrollable-feed  */}
-                  <ScrollableChat messages={messages} />
+                  <ScrollableChat
+                    messages={messages}
+                    setMessages={setMessages}
+                  />
                 </div>
 
                 {isTyping && (

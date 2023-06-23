@@ -13,9 +13,17 @@ import { Box, Button } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import GroupChatModal from "./GroupChatModal";
 import ChatLoading from "./ChatLoading";
-import { getSender, getSenderEntireInfo } from "../../Config/ChatLogics";
+import {
+  getSender,
+  getSenderEntireInfo,
+  checkCurrentUserOnline,
+} from "../../Config/ChatLogics";
 import { groupIcon } from "../../../Utility/constants";
+import io from "socket.io-client";
 
+import { ENDPOINT } from "../../../Utility/constants";
+var socket;
+// ENDPOINT: server endpoint
 const MyChats = (props) => {
   const [loggedUser, setLoggedUser] = useState();
   const {
@@ -27,6 +35,8 @@ const MyChats = (props) => {
     setNotification,
   } = ChatState();
   let toast = useToast();
+
+  const [onlineUserList, setOnlineUsersList] = useState([]);
 
   const { fetchChatAgain, setFetchChatAgain } = props;
 
@@ -64,7 +74,21 @@ const MyChats = (props) => {
         "/api/message/notification/fetch",
         config
       );
-      setNotification([...data?.notifications]);
+      let notificationsForCurentUser = [];
+
+      // when we add any message/notification to DB, it is added for all the users in that chat
+      // so when we fetch notifications from DB,
+      // for example chat has 2 users X and Y and sender is X,
+      // and now logged in user is X, then when we fetch notifications it has all notifications
+      // But on UI, we should show only those notifications for which logged in user X is not same as sender X
+      // Means we should only show RECEIVED notifications and not messages that logged in user has only sent
+      data?.notifications.forEach((currentNotification) => {
+        if (currentNotification.sender._id !== user._id) {
+          notificationsForCurentUser.push(currentNotification);
+        }
+      });
+
+      setNotification([...notificationsForCurentUser]);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -76,6 +100,16 @@ const MyChats = (props) => {
       });
     }
   };
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    // here we are emiting logged user data to socket named "setup"
+    socket.emit("user loggedin", user);
+    socket.on("get-online-users", (onlineUsers) => {
+      // console.log(onlineUsers);
+      setOnlineUsersList(onlineUsers);
+    });
+  }, []);
 
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
@@ -151,15 +185,17 @@ const MyChats = (props) => {
                     size="sm"
                     cursor="pointer"
                     name={
-                      !chat.isGroupChat && getSender(loggedUser, chat.users)
+                      !chat.isGroupChat ? getSender(loggedUser, chat.users) : ""
                     }
                     src={
                       chat.isGroupChat
                         ? groupIcon
-                        : getSenderEntireInfo(loggedUser, chat.users)
-                            .profile_pic
+                        : getSenderEntireInfo(loggedUser, chat.users) &&
+                          getSenderEntireInfo(loggedUser, chat.users)
+                            ?.profile_pic
                     }
                   ></Avatar>
+
                   <VStack align="stretch">
                     <Text as="b">
                       {!chat.isGroupChat
@@ -175,6 +211,22 @@ const MyChats = (props) => {
                       </Text>
                     )}
                   </VStack>
+                  {!chat.isGroupChat &&
+                    checkCurrentUserOnline(
+                      onlineUserList,
+                      getSenderEntireInfo(loggedUser, chat.users)?._id
+                    ) && (
+                      <div
+                        style={{
+                          height: "8px",
+                          width: "8px",
+                          backgroundColor: "#29bf11",
+                          borderRadius: "50%",
+                          display: "inline-block",
+                          marginLeft: "auto",
+                        }}
+                      ></div>
+                    )}
                 </HStack>
               </Box>
             ))}

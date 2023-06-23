@@ -8,3 +8,8 @@
   background-position: center;
   color: black;
 }
+
+.special:hover {
+  cursor: pointer;
+  background-color: #a7c5d6;
+}

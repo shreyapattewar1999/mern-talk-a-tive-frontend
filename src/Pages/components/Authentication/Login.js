@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+import axios from "axios";
+import io from "socket.io-client";
+
 import {
   VStack,
   FormControl,
@@ -12,8 +17,9 @@ import {
   FormErrorMessage,
 } from "@chakra-ui/react";
 
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { ENDPOINT } from "../../../Utility/constants";
+
+var socket;
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -85,6 +91,9 @@ const Login = () => {
           isClosable: true,
           position: "bottom",
         });
+
+        // here we are emiting logged user data to socket named "setup"
+        socket.emit("setup", data);
         localStorage.setItem("userInfo", JSON.stringify(data));
 
         setLoading(false);
@@ -122,6 +131,9 @@ const Login = () => {
     navigate("user/" + userId + "/verify");
   };
 
+  useEffect(() => {
+    socket = io(ENDPOINT);
+  }, []);
   return (
     <VStack spacing="5px">
       <FormControl

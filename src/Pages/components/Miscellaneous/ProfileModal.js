@@ -18,11 +18,9 @@ import {
   Avatar,
   useToast,
   FormControl,
-  Icon,
   Input,
   Tooltip,
 } from "@chakra-ui/react";
-
 import { DeleteIcon } from "@chakra-ui/icons";
 import { FaPencilAlt } from "react-icons/fa";
 
@@ -190,6 +188,7 @@ const ProfileModal = (props) => {
           <IconButton
             display={{ base: "flex" }}
             icon={<ViewIcon />}
+            style={{ marginLeft: "1%" }}
             onClick={onOpen}
             variant="outline"
             colorScheme="black"
