@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import io from "socket.io-client";
 
@@ -8,6 +8,7 @@ import ScrollableChat from "./ScrollableChat";
 
 import { ChatState } from "../../../Context/ChatProvider";
 import { getSender, getSenderEntireInfo } from "../../Config/ChatLogics";
+import { Input } from "@chakra-ui/react";
 
 import "../styles.css";
 
@@ -24,7 +25,7 @@ import {
   Menu,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, DeleteIcon } from "@chakra-ui/icons";
-import { AiOutlineMore } from "react-icons/ai";
+import { AiOutlineMore, AiOutlineUpload } from "react-icons/ai";
 import InputEmoji from "react-input-emoji";
 import Lottie from "react-lottie";
 import animationData from "../../../animations/typing.json";
@@ -35,8 +36,7 @@ import { ENDPOINT } from "../../../Utility/constants";
 var socket, selectedChatCompare;
 
 const SingleChat = (props) => {
-  const { user, selectedChat, setSelectedChat, notification, setNotification } =
-    ChatState();
+  const { user, selectedChat, setSelectedChat, notification } = ChatState();
 
   const { fetchChatAgain, setFetchChatAgain } = props;
 
@@ -50,8 +50,10 @@ const SingleChat = (props) => {
   const [alreadyPresentNotifications, setAlreadyPresentNotifications] =
     useState(new Set());
 
+  const hiddenInputButton = useRef(null);
   let toast = useToast();
 
+  const [showImageUploadSpinner, setShowImageUploadSpinner] = useState(false);
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -95,8 +97,6 @@ const SingleChat = (props) => {
 
       // we are creating new room, and we are giving room ID as selectedChat._id
       socket.emit("join chat", selectedChat._id);
-
-      // console.log(messages);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -153,7 +153,12 @@ const SingleChat = (props) => {
       });
     }
   };
-  const sendMessage = async () => {
+  const sendMessage = async (
+    newMessageContent,
+    isImage = false,
+    imagePath = "",
+    imagePublicId = ""
+  ) => {
     socket.emit("stop typing", selectedChat._id);
 
     // on pressing Enter key, message should get send
@@ -165,16 +170,28 @@ const SingleChat = (props) => {
         },
       };
 
-      const dataToBeSent = { chatId: selectedChat._id, content: newMessage };
+      let dataToBeSent = {
+        chatId: selectedChat._id,
+        content: newMessageContent,
+        isImage,
+      };
+      if (isImage) {
+        dataToBeSent = {
+          ...dataToBeSent,
+          imagePath: imagePath,
+          imagePublicId: imagePublicId,
+        };
+      } else {
+        if (newMessageContent.trim().length === 0) {
+          return;
+        }
+      }
 
       setNewMessage("");
 
       const { data } = await axios.post("/api/message", dataToBeSent, config);
-      // console.log(data.createdMessage);
       socket.emit("new message", data.createdMessage);
       setMessages([...messages, data.createdMessage]);
-      // console.log(data);
-      // console.log(messages);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -214,49 +231,47 @@ const SingleChat = (props) => {
     }, timerLength);
   };
 
-  const addNotificationInDb = async (notificationToBeAdded) => {
-    console.log(notificationToBeAdded?.sender?._id);
-    if (notificationToBeAdded) {
-      try {
-        const config = {
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        if (alreadyPresentNotifications.has(notificationToBeAdded._id)) {
-          return;
-        }
-
-        alreadyPresentNotifications.add(notificationToBeAdded._id);
-
-        const requestBody = {
-          chatId: notificationToBeAdded.chat._id,
-          content: notificationToBeAdded.content,
-          senderId: notificationToBeAdded.sender._id,
-          users: notificationToBeAdded.chat.users,
-          isGroupChat: notificationToBeAdded.chat.isGroupChat,
-        };
-        const { data } = await axios.post(
-          "/api/message/notification/add",
-          requestBody,
-          config
-        );
-      } catch (error) {
-        // console.log(error);
-        toast({
-          title: "Error Occured!" + { error },
-          description: "Failed to Load the chats",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom-left",
+  const postImage = (pic) => {
+    if (pic === undefined) {
+      return;
+    }
+    if (pic.size > 2000000) {
+      toast({
+        title: "Please select image of size less than 2mb",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+    if (pic.type === "image/jpeg" || pic.type === "image/png") {
+      setShowImageUploadSpinner(true);
+      toast({
+        title: "Please wait, image is being uploaded",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+      const data = new FormData();
+      data.append("file", pic);
+      data.append("upload_preset", "chat-app");
+      data.append("cloud_name", "dikosnerx");
+      fetch("https://api.cloudinary.com/v1_1/dikosnerx/image/upload", {
+        method: "post",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then(async (data) => {
+          console.log(data);
+          sendMessage("", true, data.url.toString(), data.public_id);
+          setShowImageUploadSpinner(false);
+        })
+        .catch((err) => {
+          setShowImageUploadSpinner(false);
         });
-      }
     }
   };
-
   // whenever selected chat changes, fetch messages again
   useEffect(() => {
     fetchMessages();
@@ -267,7 +282,6 @@ const SingleChat = (props) => {
   useEffect(() => {
     // here we are emiting logged user data to socket named "setup"
     socket.on("message received", async (newMessageReceived) => {
-      // console.log(newMessageReceived);
       // selectedChat._id !== selectedChatCompare._id ==> this refers to if opened chat
       //  and message received from chat are different
       // like currently opened chat is with Shreya and message is received from different group
@@ -279,9 +293,6 @@ const SingleChat = (props) => {
           selectedChatCompare._id !== newMessageReceived.chat._id)
       ) {
         if (!notification.includes(newMessageReceived)) {
-          // await addNotificationInDb(newMessageReceived);
-          // setNotification([newMessageReceived, ...notification]);
-          // console.log(notification);
           setFetchChatAgain(!fetchChatAgain);
         }
       } else {
@@ -369,7 +380,6 @@ const SingleChat = (props) => {
                     setMessages={setMessages}
                   />
                 </div>
-
                 {isTyping && (
                   <div>
                     <Lottie
@@ -379,16 +389,45 @@ const SingleChat = (props) => {
                     />
                   </div>
                 )}
-
                 {/* Read documentation about InputEmoji : https://www.npmjs.com/package/react-input-emoji  */}
                 {/* NPM Package used: react-input-emoji */}
-                <InputEmoji
-                  value={newMessage}
-                  onChange={typingHandler}
-                  cleanOnEnter
-                  onEnter={sendMessage}
-                  placeholder="Type a message"
-                />
+                {showImageUploadSpinner ? (
+                  <Spinner w={5} h={10} alignSelf="center" margin="auto" />
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: "2%",
+                    }}
+                  >
+                    <InputEmoji
+                      value={newMessage}
+                      onChange={typingHandler}
+                      cleanOnEnter
+                      onEnter={() => sendMessage(newMessage)}
+                      placeholder="Type a message"
+                    />
+                    <Input
+                      type="file"
+                      p={1.5}
+                      accept="image/*"
+                      ref={hiddenInputButton}
+                      style={{ display: "none" }}
+                      onChange={(event) => postImage(event.target.files[0])}
+                    ></Input>
+                    <Button
+                      style={{ fontSize: "x-large" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        hiddenInputButton.current.click();
+                      }}
+                    >
+                      <AiOutlineUpload />
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </Box>

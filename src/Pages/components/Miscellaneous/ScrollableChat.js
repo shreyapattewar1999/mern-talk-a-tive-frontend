@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 
 import { ChatState } from "../../../Context/ChatProvider";
-
 import ScrollableFeed from "react-scrollable-feed";
 
 import {
@@ -92,6 +91,7 @@ const ScrollableChat = (props) => {
             Authorization: `Bearer ${user.token}`,
           },
         };
+
         await axios.delete(
           `/api/message/delete/${messageToBeDeleted._id}`,
           config
@@ -279,9 +279,21 @@ const ScrollableChat = (props) => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ whiteSpace: "normal", width: "200px" }}>
-                        {currentMessage.content}
-                      </span>
+                      {currentMessage?.isImage ? (
+                        <div className="img-container">
+                          <img
+                            src={currentMessage?.imageInformation?.imagePath}
+                            alt="not available"
+                            height="200px"
+                            width="200px"
+                            onClick={() => console.log("clicked on image")}
+                          />
+                        </div>
+                      ) : (
+                        <span style={{ whiteSpace: "normal", width: "200px" }}>
+                          {currentMessage.content}
+                        </span>
+                      )}
                       <Menu>
                         <MenuButton
                           style={{ alignItems: "flex-start", marginLeft: "2%" }}
@@ -299,34 +311,46 @@ const ScrollableChat = (props) => {
                           >
                             Delete Message
                           </MenuItem>
-                          <MenuItem
-                            icon={<AiOutlineEdit />}
-                            className="special"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (showEditForm) {
-                                toast({
-                                  title:
-                                    "You are already editing some message, please click on Save or Cancel Button",
-                                  status: "error",
-                                  duration: 5000,
-                                  isClosable: true,
-                                  position: "bottom-left",
-                                });
-                                return;
-                              }
-                              // setShowEditForm(false);
-                              currentMessage.editing = true;
-                              setEditMsgText(currentMessage.content);
-                              setShowEditForm(true);
-                            }}
-                          >
-                            Edit Message
-                          </MenuItem>
+                          {!currentMessage?.isImage && (
+                            <MenuItem
+                              icon={<AiOutlineEdit />}
+                              className="special"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (showEditForm) {
+                                  toast({
+                                    title:
+                                      "You are already editing some message, please click on Save or Cancel Button",
+                                    status: "error",
+                                    duration: 5000,
+                                    isClosable: true,
+                                    position: "bottom-left",
+                                  });
+                                  return;
+                                }
+                                // setShowEditForm(false);
+                                currentMessage.editing = true;
+                                setEditMsgText(currentMessage.content);
+                                setShowEditForm(true);
+                              }}
+                            >
+                              Edit Message
+                            </MenuItem>
+                          )}
                         </MenuList>
                       </Menu>
                     </div>
                   </>
+                ) : currentMessage.isImage ? (
+                  <div className="img-container">
+                    <img
+                      src={currentMessage?.imageInformation?.imagePath}
+                      alt="not available"
+                      height="200px"
+                      width="200px"
+                      onClick={() => console.log("clicked on image")}
+                    />
+                  </div>
                 ) : (
                   <span style={{ width: "200px" }}>
                     {currentMessage.content}
