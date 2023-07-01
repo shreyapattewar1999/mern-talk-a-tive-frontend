@@ -211,7 +211,7 @@ const ForgotPassword = () => {
                       colorScheme="green"
                       size="sm"
                       width="100%"
-                      onClick={verifyOtp}
+                      onClick={() => verifyOtp()}
                     >
                       Verify Otp
                     </Button>
@@ -219,7 +219,7 @@ const ForgotPassword = () => {
                       colorScheme="red"
                       size="sm"
                       width="100%"
-                      onClick={generateOtp}
+                      onClick={() => generateOtp()}
                     >
                       Regenerate Otp
                     </Button>
@@ -281,7 +281,7 @@ const ForgotPassword = () => {
                   width="100%"
                   style={{ marginTop: 15 }}
                   // isLoading={loading}
-                  onClick={updatePasswordHandler}
+                  onClick={() => updatePasswordHandler()}
                 >
                   Change Password
                 </Button>

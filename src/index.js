@@ -20,10 +20,6 @@ const routingConfiguration = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/",
-        element: <HomePage />,
-      },
-      {
         path: "/user/:email/forgotpassword",
         element: <ForgotPassword />,
       },
@@ -34,6 +30,10 @@ const routingConfiguration = createBrowserRouter([
       {
         path: "/chats",
         element: <ChatPage />,
+      },
+      {
+        path: "/",
+        element: <HomePage />,
       },
     ],
   },

@@ -8,7 +8,7 @@ import {
   VStack,
   useToast,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +25,7 @@ const SignUp = () => {
 
   const [loading, setLoading] = useState(false);
   const toast = useToast();
-
+  const profilePicInputRef = useRef();
   let navigate = useNavigate();
 
   const postDetails = (pic) => {
@@ -102,16 +102,22 @@ const SignUp = () => {
           },
           config
         );
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        profilePicInputRef.current.value = "";
         toast({
-          title: "Registration successful",
-          status: "success",
+          title:
+            "Please verify your email address to complete registration, we have sent you verification link on your registered email address",
+          status: "info",
           duration: 5000,
           isClosable: true,
           position: "bottom",
         });
         localStorage.setItem("userInfo", JSON.stringify(data));
+
         setLoading(false);
-        // navigate("/chats");
       } catch (error) {
         toast({
           title: "Error occured !!",
@@ -133,6 +139,7 @@ const SignUp = () => {
         <FormLabel>Name</FormLabel>
         <Input
           placeholder="Enter your name"
+          value={name}
           onChange={(e) => setName(e.target.value)}
         ></Input>
       </FormControl>
@@ -150,6 +157,7 @@ const SignUp = () => {
           <Input
             type={show ? "text" : "password"}
             placeholder="Enter your password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           ></Input>
           <InputRightElement width="4.5rem">
@@ -172,6 +180,7 @@ const SignUp = () => {
           <Input
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm password"
+            value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           ></Input>
           <InputRightElement width="4.5rem">
@@ -195,6 +204,7 @@ const SignUp = () => {
           type="file"
           p={1.5}
           accept="image/*"
+          ref={profilePicInputRef}
           onChange={(e) => postDetails(e.target.files[0])}
         ></Input>
       </FormControl>

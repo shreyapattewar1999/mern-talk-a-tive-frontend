@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const ChatContext = createContext("");
 
@@ -23,11 +24,16 @@ const ChatProvider = (props) => {
   const [notification, setNotification] = useState([]);
   // to display notification indicator in header --> Sidedrawer component
   // if there is new message is received from X and currently chatbox of X is open then, received message notifcation should be deleted --> this is done in SingleChat Component
+  const location = useLocation();
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const isForgotPasswordRoute =
+      location.pathname.indexOf("forgotpassword") === -1;
+
+    const isEmailVerifyRoute = location.pathname.indexOf("verify") === -1;
     setuser(userInfo);
-    if (!userInfo) {
+    if (!userInfo && isForgotPasswordRoute && isEmailVerifyRoute) {
       navigate("/");
     }
   }, [navigate]);

@@ -11,16 +11,21 @@ import {
 } from "@chakra-ui/react";
 
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import Login from "./components/Authentication/Login";
 import SignUp from "./components/Authentication/SignUp";
 
 const HomePage = () => {
   let navigate = useNavigate();
-
+  const location = useLocation();
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    if (!userInfo) {
+    const isForgotPasswordRoute =
+      location.pathname.indexOf("forgotpassword") === -1;
+
+    const isEmailVerifyRoute = location.pathname.indexOf("verify") === -1;
+    if (!userInfo && isForgotPasswordRoute && isEmailVerifyRoute) {
       navigate("/");
     }
   }, [navigate]);

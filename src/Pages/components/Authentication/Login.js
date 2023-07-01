@@ -202,7 +202,7 @@ const Login = () => {
         <Button
           decoration="underline"
           color="blue"
-          onClick={updatePasswordHandler}
+          onClick={() => updatePasswordHandler()}
           disabled={email.length === 0}
         >
           Forgot Password
