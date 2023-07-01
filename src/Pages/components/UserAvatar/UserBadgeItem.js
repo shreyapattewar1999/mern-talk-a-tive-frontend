@@ -4,7 +4,6 @@ import React from "react";
 
 const UserBadgeItem = (props) => {
   const { user, handleDelete } = props;
-  // console.log(user._id, props?.isVisible);
   return (
     <Box
       px={2}

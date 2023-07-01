@@ -106,7 +106,6 @@ const MyChats = (props) => {
     // here we are emiting logged user data to socket named "setup"
     socket.emit("user loggedin", user);
     socket.on("get-online-users", (onlineUsers) => {
-      // console.log(onlineUsers);
       setOnlineUsersList(onlineUsers);
     });
   }, []);

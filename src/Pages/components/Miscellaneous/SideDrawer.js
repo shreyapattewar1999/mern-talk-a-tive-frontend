@@ -180,7 +180,6 @@ const SideDrawer = () => {
   };
   useEffect(() => {
     if (!notification) return;
-    // console.log(notification);
     groupNotifications();
   }, [notification]);
 
@@ -264,7 +263,6 @@ const SideDrawer = () => {
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
             <MenuList p={2} boxShadow="lg">
-              {/* {console.log(notification)} */}
               {!notification.length ? (
                 "No new messages"
               ) : (
