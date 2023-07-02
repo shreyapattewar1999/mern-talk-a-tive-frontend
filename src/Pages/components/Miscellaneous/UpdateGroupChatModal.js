@@ -22,6 +22,7 @@ import { ChatState } from "../../../Context/ChatProvider";
 import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
 import axios from "axios";
+import { ENDPOINT } from "../../../../src/Utility/constants";
 
 const UpdateGroupChatModal = (props) => {
   const { selectedChat, user, setChat, setSelectedChat } = ChatState();
@@ -66,7 +67,7 @@ const UpdateGroupChatModal = (props) => {
         },
       };
       const { data } = await axios.put(
-        "/api/chat/group/remove",
+        ENDPOINT + "/api/chat/group/remove",
         {
           chatId: selectedChat._id,
           userId: userToBeRemoved._id,
@@ -153,7 +154,7 @@ const UpdateGroupChatModal = (props) => {
         },
       };
       const { data } = await axios.post(
-        "/api/chat/group/add",
+        ENDPOINT + "/api/chat/group/add",
         {
           chatId: selectedChat._id,
           userId: userToBeAdded._id,
@@ -208,7 +209,7 @@ const UpdateGroupChatModal = (props) => {
         },
       };
       const { data } = await axios.put(
-        "/api/chat/group/rename",
+        ENDPOINT + "/api/chat/group/rename",
         {
           chatId: selectedChat._id,
           chatName: groupChatName,
@@ -243,7 +244,10 @@ const UpdateGroupChatModal = (props) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
+      const { data } = await axios.get(
+        `${ENDPOINT}/api/user?search=${search}`,
+        config
+      );
       setLoading(false);
       setSearchResult(data);
     } catch (error) {

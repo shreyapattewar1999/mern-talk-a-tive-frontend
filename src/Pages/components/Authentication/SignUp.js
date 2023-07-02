@@ -11,6 +11,7 @@ import {
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ENDPOINT } from "../../../../src/Utility/constants";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -92,7 +93,7 @@ const SignUp = () => {
           },
         };
         const { data } = await axios.post(
-          "/api/user",
+          ENDPOINT + "/api/user",
           {
             name,
             email,

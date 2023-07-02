@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
 import { FaPencilAlt } from "react-icons/fa";
+import { ENDPOINT } from "../../../Utility/constants";
 
 const ProfileModal = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -84,7 +85,7 @@ const ProfileModal = (props) => {
         },
       };
       const { data } = await axios.put(
-        "/api/user/updatepicture",
+        ENDPOINT + "/api/user/updatepicture",
         reqBody,
         config
       );
@@ -133,7 +134,10 @@ const ProfileModal = (props) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.delete("/api/user/deletepicture", config);
+      const { data } = await axios.delete(
+        ENDPOINT + "/api/user/deletepicture",
+        config
+      );
       if (data.isProfilePictureDeleted) {
         toast({
           title: "Profile picture has been deleted",

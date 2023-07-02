@@ -7,6 +7,7 @@ import {
   FaExclamationCircle,
 } from "react-icons/fa";
 import { Spinner, useToast } from "@chakra-ui/react";
+import { ENDPOINT } from "../../../../src/Utility/constants";
 
 const EmailVerify = () => {
   const [validUrl, setValidUrl] = useState(0);
@@ -21,7 +22,7 @@ const EmailVerify = () => {
   const verifyEmail = async () => {
     try {
       const { data } = await axios.get(
-        `/api/user/${params.id}/verify/${params.timestamp}`
+        `${ENDPOINT}/api/user/${params.id}/verify/${params.timestamp}`
       );
       if (data.validUrl) {
         toast({

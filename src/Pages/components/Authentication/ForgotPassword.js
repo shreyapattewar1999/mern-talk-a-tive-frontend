@@ -19,6 +19,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import OtpInput from "react-otp-input";
+import { ENDPOINT } from "../../../Utility/constants";
 
 const ForgotPassword = () => {
   const params = useParams();
@@ -45,7 +46,7 @@ const ForgotPassword = () => {
         },
       };
       const { data } = await axios.post(
-        "/api/user/generateOtp",
+        ENDPOINT + "/api/user/generateOtp",
         {
           email: params?.email,
         },
@@ -85,7 +86,7 @@ const ForgotPassword = () => {
       };
       const reqBody = { email, password };
       const { data } = await axios.put(
-        "/api/user/updatepassword",
+        ENDPOINT + "/api/user/updatepassword",
         reqBody,
         config
       );
@@ -119,7 +120,11 @@ const ForgotPassword = () => {
         },
       };
       const reqBody = { email, entered_otp: otp };
-      const { data } = await axios.post("/api/user/verifyotp", reqBody, config);
+      const { data } = await axios.post(
+        ENDPOINT + "/api/user/verifyotp",
+        reqBody,
+        config
+      );
       toast({
         title: data?.message,
         status: "success",

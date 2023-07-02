@@ -39,6 +39,7 @@ import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FaSearch } from "react-icons/fa";
 import NotificationBadge, { Effect } from "react-notification-badge";
 import { ENDPOINT } from "../../../Utility/constants";
+
 var socket;
 const SideDrawer = () => {
   const [search, setsearch] = useState("");
@@ -85,7 +86,11 @@ const SideDrawer = () => {
         },
       };
 
-      const { data } = await axios.post("/api/chat", { userId }, config);
+      const { data } = await axios.post(
+        ENDPOINT + "/api/chat",
+        { userId },
+        config
+      );
 
       if (chats && !chats?.chat.find((c) => c._id === data.chat._id)) {
         chats.chat.unshift(data.chat);
@@ -129,7 +134,10 @@ const SideDrawer = () => {
         },
       };
 
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
+      const { data } = await axios.get(
+        `${ENDPOINT}/api/user?search=${search}`,
+        config
+      );
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
@@ -204,7 +212,7 @@ const SideDrawer = () => {
       setModifiedNotification(modifiedNotification);
       if (eachNotification[0]?.chat?._id) {
         const { data } = await axios.put(
-          "/api/message/notification/remove",
+          ENDPOINT + "/api/message/notification/remove",
           {
             chatId: eachNotification[0]?.chat?._id,
             isGroupChat: eachNotification[0]?.chat.isGroupChat,

@@ -48,7 +48,7 @@ const MyChats = (props) => {
         },
       };
 
-      const { data } = await axios.get("/api/chat", config);
+      const { data } = await axios.get(ENDPOINT + "/api/chat", config);
       setChats(data);
     } catch (error) {
       toast({
@@ -71,7 +71,7 @@ const MyChats = (props) => {
         },
       };
       const { data } = await axios.get(
-        "/api/message/notification/fetch",
+        ENDPOINT + "/api/message/notification/fetch",
         config
       );
       let notificationsForCurentUser = [];

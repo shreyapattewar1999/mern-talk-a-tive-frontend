@@ -88,7 +88,7 @@ const SingleChat = (props) => {
       };
 
       const { data } = await axios.get(
-        `/api/message/${selectedChat._id}`,
+        `${ENDPOINT}/api/message/${selectedChat._id}`,
         config
       );
 
@@ -131,7 +131,7 @@ const SingleChat = (props) => {
           },
         };
         await axios.delete(
-          `api/message/clearMessages/${selectedChat._id}`,
+          `${ENDPOINT}/api/message/clearMessages/${selectedChat._id}`,
           config
         );
         setMessages([]);
@@ -189,7 +189,11 @@ const SingleChat = (props) => {
 
       setNewMessage("");
 
-      const { data } = await axios.post("/api/message", dataToBeSent, config);
+      const { data } = await axios.post(
+        ENDPOINT + "/api/message",
+        dataToBeSent,
+        config
+      );
       socket.emit("new message", data.createdMessage);
       setMessages([...messages, data.createdMessage]);
     } catch (error) {
