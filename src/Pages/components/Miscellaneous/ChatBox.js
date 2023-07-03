@@ -1,11 +1,14 @@
 import { Box } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { ChatState } from "../../../Context/ChatProvider";
 import SingleChat from "./SingleChat";
 
 const ChatBox = (props) => {
   const { selectedChat } = ChatState();
   const { fetchChatAgain, setFetchChatAgain } = props;
+  useEffect(() => {
+    console.log("Chatbox page called");
+  }, []);
 
   return (
     <Box

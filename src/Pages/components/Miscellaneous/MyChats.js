@@ -21,9 +21,9 @@ import {
 import { groupIcon } from "../../../Utility/constants";
 import io from "socket.io-client";
 
-import { ENDPOINT } from "../../../Utility/constants";
+import { Socket_ENDPOINT } from "../../../Utility/constants";
 var socket;
-// ENDPOINT: server endpoint
+// Socket_ENDPOINT: server Socket_ENDPOINT
 const MyChats = (props) => {
   const [loggedUser, setLoggedUser] = useState();
   const {
@@ -48,7 +48,7 @@ const MyChats = (props) => {
         },
       };
 
-      const { data } = await axios.get(ENDPOINT + "/api/chat", config);
+      const { data } = await axios.get("/api/chat", config);
       setChats(data);
     } catch (error) {
       toast({
@@ -71,7 +71,7 @@ const MyChats = (props) => {
         },
       };
       const { data } = await axios.get(
-        ENDPOINT + "/api/message/notification/fetch",
+        "/api/message/notification/fetch",
         config
       );
       let notificationsForCurentUser = [];
@@ -102,7 +102,8 @@ const MyChats = (props) => {
   };
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(Socket_ENDPOINT);
+    console.log("my chats page called");
     // here we are emiting logged user data to socket named "setup"
     socket.emit("user loggedin", user);
     socket.on("get-online-users", (onlineUsers) => {

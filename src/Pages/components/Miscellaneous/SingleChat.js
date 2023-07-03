@@ -30,7 +30,7 @@ import InputEmoji from "react-input-emoji";
 import Lottie from "react-lottie";
 import animationData from "../../../animations/typing.json";
 
-import { ENDPOINT } from "../../../Utility/constants";
+import { Socket_ENDPOINT } from "../../../Utility/constants";
 // ENDPOINT: server endpoint
 
 var socket, selectedChatCompare;
@@ -64,7 +64,7 @@ const SingleChat = (props) => {
   };
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(Socket_ENDPOINT);
     // here we are emiting logged user data to socket named "setup"
     socket.emit("setup", user);
     socket.on("connected", () => {
@@ -88,7 +88,7 @@ const SingleChat = (props) => {
       };
 
       const { data } = await axios.get(
-        `${ENDPOINT}/api/message/${selectedChat._id}`,
+        `/api/message/${selectedChat._id}`,
         config
       );
 
@@ -131,7 +131,7 @@ const SingleChat = (props) => {
           },
         };
         await axios.delete(
-          `${ENDPOINT}/api/message/clearMessages/${selectedChat._id}`,
+          `/api/message/clearMessages/${selectedChat._id}`,
           config
         );
         setMessages([]);
@@ -189,11 +189,7 @@ const SingleChat = (props) => {
 
       setNewMessage("");
 
-      const { data } = await axios.post(
-        ENDPOINT + "/api/message",
-        dataToBeSent,
-        config
-      );
+      const { data } = await axios.post("/api/message", dataToBeSent, config);
       socket.emit("new message", data.createdMessage);
       setMessages([...messages, data.createdMessage]);
     } catch (error) {

@@ -38,7 +38,7 @@ import {
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FaSearch } from "react-icons/fa";
 import NotificationBadge, { Effect } from "react-notification-badge";
-import { ENDPOINT } from "../../../Utility/constants";
+import { Socket_ENDPOINT } from "../../../Utility/constants";
 
 var socket;
 const SideDrawer = () => {
@@ -66,7 +66,7 @@ const SideDrawer = () => {
   let navigate = useNavigate();
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(Socket_ENDPOINT);
   }, []);
   const logoutHandler = async () => {
     socket.emit("logout-current-user", user._id);
@@ -86,11 +86,7 @@ const SideDrawer = () => {
         },
       };
 
-      const { data } = await axios.post(
-        ENDPOINT + "/api/chat",
-        { userId },
-        config
-      );
+      const { data } = await axios.post("/api/chat", { userId }, config);
 
       if (chats && !chats?.chat.find((c) => c._id === data.chat._id)) {
         chats.chat.unshift(data.chat);
@@ -134,10 +130,7 @@ const SideDrawer = () => {
         },
       };
 
-      const { data } = await axios.get(
-        `${ENDPOINT}/api/user?search=${search}`,
-        config
-      );
+      const { data } = await axios.get(`/api/user?search=${search}`, config);
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
@@ -212,7 +205,7 @@ const SideDrawer = () => {
       setModifiedNotification(modifiedNotification);
       if (eachNotification[0]?.chat?._id) {
         const { data } = await axios.put(
-          ENDPOINT + "/api/message/notification/remove",
+          "/api/message/notification/remove",
           {
             chatId: eachNotification[0]?.chat?._id,
             isGroupChat: eachNotification[0]?.chat.isGroupChat,

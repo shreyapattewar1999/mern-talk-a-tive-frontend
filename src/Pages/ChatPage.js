@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MyChats from "./components/Miscellaneous/MyChats";
 import ChatBox from "./components/Miscellaneous/ChatBox";
 import SideDrawer from "./components/Miscellaneous/SideDrawer";
@@ -7,6 +7,10 @@ import { ChatState } from "../Context/ChatProvider";
 const ChatPage = () => {
   const { user } = ChatState();
   const [fetchChatAgain, setFetchChatAgain] = useState(false);
+
+  useEffect(() => {
+    console.log("chat page called");
+  }, []);
 
   return (
     <>

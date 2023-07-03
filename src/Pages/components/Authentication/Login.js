@@ -17,7 +17,8 @@ import {
   FormErrorMessage,
 } from "@chakra-ui/react";
 
-import { ENDPOINT } from "../../../Utility/constants";
+import { Socket_ENDPOINT } from "../../../Utility/constants";
+import { ChatState } from "../../../Context/ChatProvider";
 
 var socket;
 
@@ -31,6 +32,7 @@ const Login = () => {
   const [isEmailValid, setIsEmailValid] = useState(true);
   const toast = useToast();
 
+  const { setuser } = ChatState();
   let navigate = useNavigate();
 
   const getGuestUserCredentials = () => {
@@ -77,7 +79,7 @@ const Login = () => {
           },
         };
         const { data } = await axios.post(
-          ENDPOINT + "/api/user/login",
+          "/api/user/login",
           {
             email,
             password,
@@ -94,6 +96,7 @@ const Login = () => {
 
         // here we are emiting logged user data to socket named "setup"
         socket.emit("setup", data);
+        setuser(data);
         localStorage.setItem("userInfo", JSON.stringify(data));
 
         setLoading(false);
@@ -132,7 +135,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(Socket_ENDPOINT);
   }, []);
   return (
     <VStack spacing="5px">

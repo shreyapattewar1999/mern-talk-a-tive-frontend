@@ -27,7 +27,6 @@ import {
 import { DeleteIcon } from "@chakra-ui/icons";
 import "../../../../src/App.css";
 import { AiOutlineEllipsis, AiOutlineEdit } from "react-icons/ai";
-import { ENDPOINT } from "../../../Utility/constants";
 
 const ScrollableChat = (props) => {
   const { user } = ChatState();
@@ -94,7 +93,7 @@ const ScrollableChat = (props) => {
         };
 
         await axios.delete(
-          `${ENDPOINT}/api/message/delete/${messageToBeDeleted._id}`,
+          `/api/message/delete/${messageToBeDeleted._id}`,
           config
         );
         // fetchMessages();
@@ -136,7 +135,7 @@ const ScrollableChat = (props) => {
         },
       };
       await axios.put(
-        `${ENDPOINT}/api/message/edit/${currentMessage._id}`,
+        `/api/message/edit/${currentMessage._id}`,
         {
           newMessageText: editMsgText,
         },

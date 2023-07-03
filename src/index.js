@@ -20,6 +20,10 @@ const routingConfiguration = createBrowserRouter([
     element: <App />,
     children: [
       {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
         path: "/user/:email/forgotpassword",
         element: <ForgotPassword />,
       },
@@ -31,26 +35,15 @@ const routingConfiguration = createBrowserRouter([
         path: "/chats",
         element: <ChatPage />,
       },
-      {
-        path: "/",
-        element: <HomePage />,
-      },
     ],
   },
 ]);
 root.render(
-  <>
+  <React.StrictMode>
     <ChakraProvider>
       <RouterProvider router={routingConfiguration}></RouterProvider>
     </ChakraProvider>
-  </>
-  // <div className="app">
-  //   <RouterProvider router={routingConfiguration}>
-  //     <ChatProvider>
-  //       <ChakraProvider>{/* <App /> */}</ChakraProvider>
-  //     </ChatProvider>
-  //   </RouterProvider>
-  // </div>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
