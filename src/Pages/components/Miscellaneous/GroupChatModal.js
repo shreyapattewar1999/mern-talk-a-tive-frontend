@@ -126,6 +126,14 @@ const GroupChatModal = (props) => {
     );
   };
 
+  const openModal = () => {
+    setSearch("");
+    setSearchResult([]);
+    setGroupChatName("");
+    setSelectedUsers([]);
+    onOpen();
+  };
+
   // Debouncing
   useEffect(() => {
     const timer = setTimeout(() => getSearchSuggestions(), 200);
@@ -137,7 +145,7 @@ const GroupChatModal = (props) => {
   return (
     <>
       {/* here props.children is button to Start Group Chat which is when clicked onOpen function of modal popup gets called and modal popup gets opened */}
-      <span onClick={onOpen}>{props.children}</span>
+      <span onClick={openModal}>{props.children}</span>
 
       {/* initialFocusRef={initialRef} => this is used to focus first input box for chat name as soon as modal is opened */}
       <Modal

@@ -283,6 +283,9 @@ const UpdateGroupChatModal = (props) => {
     onClose();
   };
   const openModal = () => {
+    setGroupChatName(selectedChat.chatName);
+    setSearch("");
+    setSearchResult([]);
     setIsModalOpen(true);
     onOpen();
   };
