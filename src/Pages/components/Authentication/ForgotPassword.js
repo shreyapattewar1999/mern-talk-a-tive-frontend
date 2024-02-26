@@ -14,9 +14,8 @@ import {
   Tooltip,
   HStack,
 } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 import OtpInput from "react-otp-input";
 
@@ -69,12 +68,13 @@ const ForgotPassword = () => {
     }
   };
 
+  // from react18 onwards, useEffect with empty dependency array will be called twice only in DEVELOPMENT mode
   useEffect(() => {
     setEmail(params?.email);
     if (params?.email) {
       generateOtp();
     }
-  }, []);
+  }, [params?.email]);
 
   const updatePasswordHandler = async () => {
     try {

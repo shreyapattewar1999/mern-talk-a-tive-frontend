@@ -6,6 +6,7 @@ import SingleChat from "./SingleChat";
 const ChatBox = (props) => {
   const { selectedChat } = ChatState();
   const { fetchChatAgain, setFetchChatAgain } = props;
+
   useEffect(() => {
     console.log("Chatbox page called");
   }, []);

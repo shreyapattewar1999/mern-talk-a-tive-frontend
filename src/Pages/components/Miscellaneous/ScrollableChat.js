@@ -171,7 +171,7 @@ const ScrollableChat = (props) => {
               isLastMessage(messages, index, user._id)) && (
               <>
                 <Tooltip
-                  label={currentMessage.sender.name}
+                  label={currentMessage?.sender?.name}
                   placement="bottom-start"
                 >
                   <Avatar

@@ -15,8 +15,9 @@ import {
   useToast,
   Tooltip,
   FormErrorMessage,
+  Text,
 } from "@chakra-ui/react";
-
+import { GoogleLogin } from "react-google-login";
 import { Socket_ENDPOINT } from "../../../Utility/constants";
 import { ChatState } from "../../../Context/ChatProvider";
 
@@ -33,6 +34,7 @@ const Login = () => {
   const toast = useToast();
 
   const { setuser } = ChatState();
+
   let navigate = useNavigate();
 
   const getGuestUserCredentials = () => {
@@ -137,6 +139,11 @@ const Login = () => {
   useEffect(() => {
     socket = io(Socket_ENDPOINT);
   }, []);
+
+  const test = (response) => {
+    console.log(response);
+  };
+
   return (
     <VStack spacing="5px">
       <FormControl
@@ -180,6 +187,21 @@ const Login = () => {
           </InputRightElement>
         </InputGroup>
       </FormControl>
+      <Tooltip
+        label={email.length === 0 ? "Please enter valid email address" : ""}
+      >
+        <Text
+          style={{
+            marginRight: "auto",
+            color: email.length === 0 ? "grey" : "blue",
+            cursor: "pointer",
+          }}
+          onClick={() => updatePasswordHandler()}
+          disabled={email.length !== 0}
+        >
+          Forgot password ?
+        </Text>
+      </Tooltip>
       <Button
         colorScheme="blue"
         width="100%"
@@ -197,20 +219,13 @@ const Login = () => {
       >
         Get Guest User Credentials
       </Button>
-      <Tooltip
-        label={
-          email.length === 0 ? "Please enter valid email address first" : ""
-        }
-      >
-        <Button
-          decoration="underline"
-          color="blue"
-          onClick={() => updatePasswordHandler()}
-          disabled={email.length === 0}
-        >
-          Forgot Password
-        </Button>
-      </Tooltip>
+      <GoogleLogin
+        clientId="640177302186-pa4lpso589ap5ealh7hp0pvmoa7eg7is.apps.googleusercontent.com"
+        buttonText="Login/Sign up with Google"
+        onSuccess={test}
+        onFailure={test}
+        cookiePolicy={"single_host_origin"}
+      ></GoogleLogin>
     </VStack>
   );
 };

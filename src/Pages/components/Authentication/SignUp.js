@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -26,7 +25,6 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const profilePicInputRef = useRef();
-  let navigate = useNavigate();
 
   const postDetails = (pic) => {
     setLoading(true);

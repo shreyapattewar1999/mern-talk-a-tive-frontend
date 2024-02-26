@@ -204,7 +204,7 @@ const MyChats = (props) => {
                     </Text>
                     {chat.lastMessage && (
                       <Text fontSize="sm" style={{ marginTop: "0px" }}>
-                        {chat.lastMessage.sender.name.split(" ")[0]} :{" "}
+                        {chat.lastMessage?.sender?.name.split(" ")[0]} :{" "}
                         {chat.lastMessage.content.length > 50
                           ? chat.lastMessage.content.substring(0, 51) + "..."
                           : chat.lastMessage.content}

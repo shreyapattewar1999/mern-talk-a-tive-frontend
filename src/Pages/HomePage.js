@@ -10,8 +10,7 @@ import {
   TabPanel,
 } from "@chakra-ui/react";
 
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import Login from "./components/Authentication/Login";
 import SignUp from "./components/Authentication/SignUp";
@@ -19,6 +18,7 @@ import SignUp from "./components/Authentication/SignUp";
 const HomePage = () => {
   let navigate = useNavigate();
   const location = useLocation();
+
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const isForgotPasswordRoute =

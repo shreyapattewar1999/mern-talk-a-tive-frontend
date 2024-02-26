@@ -68,12 +68,14 @@ const SideDrawer = () => {
   useEffect(() => {
     socket = io(Socket_ENDPOINT);
   }, []);
+
   const logoutHandler = async () => {
     socket.emit("logout-current-user", user._id);
 
     localStorage.removeItem("userInfo");
     navigate("/");
   };
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const accessChat = async (userId) => {
@@ -179,6 +181,7 @@ const SideDrawer = () => {
     });
     return count;
   };
+
   useEffect(() => {
     if (!notification) return;
     groupNotifications();

@@ -66,6 +66,8 @@ const SingleChat = (props) => {
   useEffect(() => {
     socket = io(Socket_ENDPOINT);
     // here we are emiting logged user data to socket named "setup"
+    // if we login for first time --> in login page also we emit the data to same socket
+    // TODO: we may need tp remove line 71 from this component or from login component
     socket.emit("setup", user);
     socket.on("connected", () => {
       setSocketConnected(true);
@@ -153,6 +155,7 @@ const SingleChat = (props) => {
       });
     }
   };
+
   const sendMessage = async (
     newMessageContent,
     isImage = false,
@@ -296,6 +299,10 @@ const SingleChat = (props) => {
           setFetchChatAgain(!fetchChatAgain);
         }
       } else {
+        // line no 197 where we are emitting "new message" there also we have written this line,
+        // but it is not required at both places
+        // since react schedules batch update for setting state variables, this is not impacting right now
+        // TODO: remove either line no 197 or 306, setMessages([...]) is a duplicate
         setMessages([...messages, newMessageReceived]);
       }
     });
